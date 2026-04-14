@@ -1,0 +1,1 @@
+window.CANYONS_MAPTILER_API_KEY = "7sWJuo1zb544CtYQb2jV";
