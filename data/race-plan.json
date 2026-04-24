@@ -46,19 +46,19 @@
       "name": "Michigan Bluff",
       "eta": "8:54 AM",
       "arriveBy": "8:20 AM",
-      "summary": "Main reset."
+      "summary": "Meet near aid station with go-bag, enough Naak gels for the next segment, and an optional extra filled bottle."
     },
     {
       "name": "Foresthill",
       "eta": "10:05 AM",
       "arriveBy": "9:40 AM",
-      "summary": "Cooling, sunscreen, solid food."
+      "summary": "Meet near aid station with go-bag, Naak gels for the next segment, bladder refill to 1L, and an optional extra filled bottle."
     },
     {
       "name": "Drivers Flat",
       "eta": "1:34 PM",
       "arriveBy": "1:04 PM",
-      "summary": "Second reset, push to finish."
+      "summary": "Meet near aid station with go-bag, Naak gels for the next segment, bladder refill to 1L, and an optional extra filled bottle."
     }
   ],
   "stops": [
@@ -151,7 +151,7 @@
         { "label": "Aid", "type": "aid" },
         { "label": "Cut 12:45 PM", "type": "warn" }
       ],
-      "crewCallout": "CREW HERE: arrive by 8:00 AM. There will be a 0.5 mile walk to the aid station. Fast bottle swap, cooling, sunscreen, quick stomach/feet check.",
+      "crewCallout": "CREW HERE: arrive by 8:00 AM and meet near the aid station. Have the go-bag ready, enough Naak gels for the next segment, and an optional extra filled bottle. Fast handoff: bottles, cooling, sunscreen, trash, quick stomach and feet check.",
       "resupplyTo": "Foresthill",
       "resupplyNote": "Short crew-to-crew block. Keep the handoff fast and leave with simple calories.",
       "nextLeg": {
@@ -174,7 +174,7 @@
         { "label": "Drop bag", "type": "crew" },
         { "label": "Cut 2:30 PM", "type": "warn" }
       ],
-      "crewCallout": "CREW HERE: arrive by 9:35AM. Main reset: bottles, drop bag, socks/body glide if needed, matzah, fuel for Cal Street.",
+      "crewCallout": "CREW HERE: arrive by 9:35 AM and meet near the aid station. Have the go-bag ready, enough Naak gels for the next segment, and be ready to take the bladder and fill it to the 1L mark. Optional extra filled bottle ready too. Main reset: bottles, drop bag, socks/body glide if needed, matzah, and fuel for Cal Street.",
       "resupplyTo": "Drivers Flat",
       "resupplyNote": "Longest crew-to-crew block. Use Cal 2 full aid, but leave Foresthill with the block covered.",
       "nextLeg": {
@@ -216,7 +216,7 @@
         { "label": "Aid", "type": "aid" },
         { "label": "Cut 7:45 PM", "type": "warn" }
       ],
-      "crewCallout": "CREW HERE: arrive by 1:00 PM. There is a 0.5 walk to the aid station. Last handoff: lights, warmth, calories through the finish, decisive exit.",
+      "crewCallout": "CREW HERE: arrive by 1:00 PM and meet near the aid station. Have the go-bag ready, enough Naak gels for the next segment, and be ready to take the bladder and fill it to the 1L mark. Optional extra filled bottle ready too. Last handoff: lights, warmth, calories through the finish, decisive exit.",
       "resupplyTo": "Downtown Auburn Finish",
       "resupplyLabel": "Finish",
       "resupplyNote": "Final personal-fuel load. Add light, warm layer, and enough finish fuel to avoid bargaining.",
@@ -285,15 +285,15 @@
   "crewCheatSheet": [
     {
       "name": "Michigan Bluff",
-      "detail": "Fast stop. Bottles, cooling, sunscreen, trash, quick stomach/feet check."
+      "detail": "Meet near the aid station with the go-bag, enough Naak gels for the next segment, and an optional extra filled bottle. Fast stop: bottles, cooling, sunscreen, trash, quick stomach and feet check."
     },
     {
       "name": "Foresthill",
-      "detail": "Main reset. Drop bag, socks/lube if needed, preferred fuel, weather choice."
+      "detail": "Meet near the aid station with the go-bag, enough Naak gels for the next segment, bladder refill to the 1L mark, and an optional extra filled bottle. Main reset: drop bag, socks/lube if needed, preferred fuel, weather choice."
     },
     {
       "name": "Drivers Flat",
-      "detail": "Final handoff. Light, warmth, finish fuel, confidence, and send."
+      "detail": "Meet near the aid station with the go-bag, enough Naak gels for the next segment, bladder refill to the 1L mark, and an optional extra filled bottle. Final handoff: light, warmth, finish fuel, confidence, and send."
     }
   ],
   "maps": [
