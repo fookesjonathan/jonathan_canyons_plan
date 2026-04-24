@@ -657,7 +657,6 @@ ${styles}
           </div>
           <div class="station-route-line">
             <div class="station-route-stop">
-              <span id="station-meta">Depart 5:00 AM</span>
               <h2 id="station-name">China Wall Start</h2>
               <div class="time-stack">
                 <span><strong>Expected</strong> <em id="station-expected-time">5:00 AM</em></span>
@@ -666,7 +665,6 @@ ${styles}
             </div>
             <span class="station-route-arrow">to</span>
             <div class="station-route-stop">
-              <span id="arrival-meta">Arrive 7:25 AM</span>
               <strong id="next-stop">Deadwood 1</strong>
               <div class="time-stack">
                 <span><strong>Expected</strong> <em id="next-expected-time">6:27 AM</em></span>
@@ -787,8 +785,6 @@ ${styles}
       liveStatusTitle: document.getElementById("live-status-title"),
       liveStatusDetail: document.getElementById("live-status-detail"),
       stationName: document.getElementById("station-name"),
-      stationMeta: document.getElementById("station-meta"),
-      arrivalMeta: document.getElementById("arrival-meta"),
       stationExpectedTime: document.getElementById("station-expected-time"),
       stationActualTime: document.getElementById("station-actual-time"),
       nextExpectedTime: document.getElementById("next-expected-time"),
@@ -1640,9 +1636,7 @@ ${styles}
 
       elements.stationOverline.textContent = context.complete ? "Last leg complete" : "Current leg";
       elements.stationName.textContent = context.depart.name;
-      elements.stationMeta.textContent = "Depart " + context.depart.eta;
       elements.nextStop.textContent = context.arrive ? context.arrive.name : "Done";
-      elements.arrivalMeta.textContent = context.arrive ? "Arrive " + context.arrive.eta : "";
       elements.stationExpectedTime.textContent = departExpectedLabel;
       elements.stationActualTime.textContent = formatClock(departActual);
       elements.nextExpectedTime.textContent = arriveExpectedLabel;
