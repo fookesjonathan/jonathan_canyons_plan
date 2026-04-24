@@ -920,6 +920,47 @@ h2 {
   min-width: 0;
 }
 
+.live-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.live-status[data-state="live"] {
+  border-color: rgba(15, 118, 110, 0.26);
+  background: #f3fbf9;
+}
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #b8c3bd;
+  box-shadow: 0 0 0 4px rgba(184, 195, 189, 0.2);
+}
+
+.live-status[data-state="live"] .live-dot {
+  background: var(--trail);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+}
+
+.live-status strong {
+  font-size: 12px;
+  line-height: 1.05;
+}
+
+.live-status span:last-child {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
 .station-route-arrow {
   color: var(--muted);
   font-size: 10px;
@@ -948,6 +989,39 @@ h2 {
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.time-stack {
+  display: grid;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.time-stack span {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.time-stack strong {
+  min-width: 54px;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.time-stack em {
+  color: var(--ink);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .station-tags {
@@ -1485,6 +1559,19 @@ h2 {
     gap: 6px;
   }
 
+  .live-status {
+    gap: 2px 6px;
+    padding: 6px 7px;
+  }
+
+  .live-status strong {
+    font-size: 11px;
+  }
+
+  .live-status span:last-child {
+    font-size: 10px;
+  }
+
   .station-route-stop h2,
   .station-route-stop strong {
     font-size: 14px;
@@ -1494,6 +1581,20 @@ h2 {
   .station-route-stop span {
     margin-bottom: 1px;
     font-size: 10px;
+  }
+
+  .time-stack {
+    gap: 2px;
+    margin-top: 4px;
+  }
+
+  .time-stack strong {
+    min-width: 46px;
+    font-size: 9px;
+  }
+
+  .time-stack em {
+    font-size: 11px;
   }
 
   .station-route-arrow {
@@ -1769,7 +1870,7 @@ h2 {
             </div>
             <div class="eta"><span>ETA</span>6:27 AM</div>
           </div>
-          <p class="note">Refill and keep enough food for the Swinging Bridge loop through Deadwood 2.</p>
+          <p class="note">Refill and keep enough food for the Devils Thumb loop through Deadwood 2.</p>
 
 
           <div class="leg">
@@ -1789,7 +1890,7 @@ h2 {
             </div>
             <div class="eta"><span>ETA</span>6:59 AM</div>
           </div>
-          <p class="note">Reset for the steep climb back to Deadwood 2.</p>
+          <p class="note">Reset for the steep climb back to Devils Thumb.</p>
 
 
           <div class="leg">

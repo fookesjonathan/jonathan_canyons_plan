@@ -1,0 +1,174 @@
+{
+  "fetchedAt": "2026-04-24T15:53:54.354Z",
+  "sourceUrl": "https://live.utmb.world/canyons/2026/runners/1159",
+  "currentEvent": {
+    "tenant": "canyons",
+    "year": 2026,
+    "title": "The Canyons Endurance Runs™ by UTMB®",
+    "dateFormatted": "23 - 26 April 2026",
+    "dateStart": "2026-04-23",
+    "dateEnd": "2026-04-26",
+    "logo": "/canyons/Event Logos/UTMB_21_The_Canyons_Logo_reverse_3_85a29e6022.png",
+    "logoColor": "/canyons/Event Logos/UTMB_21_The_Canyons_Logo_full_e9481db76d.png",
+    "picture": "/canyons/DJI_0061_2fdb828c3c.jpg",
+    "continent": "North America",
+    "country": "United States of America",
+    "countryCode": "US",
+    "hasLiveVideo": false,
+    "url": "https://canyons.utmb.world",
+    "weather": {
+      "id": 800,
+      "icon": "01d",
+      "main": "Clear",
+      "placeName": "Auburn",
+      "temp": 11
+    },
+    "playgrounds": [
+      "hikingTrail",
+      "mountain",
+      "singleTrack",
+      "woods"
+    ],
+    "raceCategories": [
+      "20k",
+      "50k",
+      "100k",
+      "100m"
+    ],
+    "isLive": 1,
+    "placeName": "Auburn, California"
+  },
+  "runner": {
+    "resume": {
+      "bib": 1159,
+      "info": {
+        "age": 29,
+        "fullname": "Jonathan FOOKES",
+        "initials": "JF",
+        "photo": null,
+        "photoWebTv": null,
+        "url": "https://utmb.world/runner/4795090.jonathan.fookes",
+        "index": 574,
+        "countryCode": "US",
+        "category": "20-34M",
+        "sex": "H",
+        "club": null,
+        "teamMembers": null
+      },
+      "ranking": {
+        "scratch": null,
+        "sex": null,
+        "category": null
+      },
+      "lastLocation": null,
+      "start": null,
+      "raceId": "100k",
+      "raceName": "100K",
+      "raceCategory": "100k",
+      "prediction": {
+        "lastPointId": 0,
+        "lastPassing": null,
+        "nextPointId": null,
+        "nextPointPrediction": null,
+        "finishPrediction": null
+      },
+      "isFinisher": false,
+      "status": "nl",
+      "diffToFirst": null
+    },
+    "detail": {
+      "passings": [
+        {
+          "pointId": 0,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 4,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 12,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 14,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 16,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 18,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 20,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 22,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 24,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        },
+        {
+          "pointId": 100,
+          "datetimeIn": null,
+          "datetimeOut": null,
+          "restTimeSeconds": null,
+          "speed": null,
+          "pace": null
+        }
+      ],
+      "raceId": "100k",
+      "raceTimeInSeconds": 0
+    },
+    "raceIdHash": 1107728195,
+    "country": {
+      "code": "US",
+      "cio": "USA",
+      "locale": "_en",
+      "name": "United States of America",
+      "nationality": "American"
+    }
+  }
+}

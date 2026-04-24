@@ -4,9 +4,28 @@
   "subtitle": "Compact 13-hour working plan. All ETAs and leg paces are planning estimates; official course markings and race-week updates win.",
   "versionNote": "Version: generated compact draft, 13-hour schedule. Next pass: exact target time, maps, parking screenshots, and product-specific fuel math.",
   "race": {
+    "dateLocal": "2026-04-25",
     "start": "5:00 AM",
     "finishGoal": "5:30 PM",
     "courseDistanceMi": 61.6
+  },
+  "liveTracking": {
+    "provider": "utmb",
+    "runnerUrl": "https://live.utmb.world/canyons/2026/runners/1159",
+    "refreshMs": 60000,
+    "timezone": "America/Los_Angeles",
+    "pointMappings": [
+      { "pointId": 0, "stop": "China Wall Start" },
+      { "pointId": 4, "stop": "Deadwood 1" },
+      { "pointId": 12, "stop": "Swinging Bridge" },
+      { "pointId": 14, "stop": "Deadwood 2" },
+      { "pointId": 16, "stop": "Michigan Bluff" },
+      { "pointId": 18, "stop": "Foresthill" },
+      { "pointId": 20, "stop": "Cal 2" },
+      { "pointId": 22, "stop": "Drivers Flat" },
+      { "pointId": 24, "stop": "Confluence" },
+      { "pointId": 100, "stop": "Downtown Auburn Finish" }
+    ]
   },
   "nutrition": {
     "carbsPerHour": 90,

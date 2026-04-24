@@ -6,10 +6,12 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const DATA_PATH = path.join(ROOT, "data", "race-plan.json");
 const GPX_PATH = path.join(ROOT, "data", "canyons-100k-course.gpx");
+const LIVE_DATA_PATH = path.join(ROOT, "data", "live-runner.json");
 const STYLE_PATH = path.join(ROOT, "src", "styles.css");
 const INDEX_OUTPUT_PATH = path.join(ROOT, "docs", "index.html");
 const GUIDE_OUTPUT_PATH = path.join(ROOT, "docs", "canyons-100k-crew-guide.html");
 const TRACKER_OUTPUT_PATH = path.join(ROOT, "docs", "canyons-100k-route-tracker.html");
+const LIVE_DATA_OUTPUT_PATH = path.join(ROOT, "docs", "live-runner.json");
 const NOJEKYLL_OUTPUT_PATH = path.join(ROOT, "docs", ".nojekyll");
 const FEET_PER_METER = 3.28084;
 const EARTH_RADIUS_MI = 3958.7613;
@@ -327,11 +329,15 @@ function stopTypeFor(stop) {
 
 function routeStopForClient(stop, index) {
   const resupply = resupplyFor(stop, index);
+  const plannedMinutesFromStart = plan.stops
+    .slice(0, index)
+    .reduce((total, currentStop) => total + (currentStop.nextLeg ? currentStop.nextLeg.plannedMinutes : 0), 0);
 
   return {
     name: stop.name,
     mile: stop.mile,
     eta: stop.eta,
+    plannedMinutesFromStart,
     kind: stop.kind || "aid",
     type: stopTypeFor(stop),
     tags: stop.tags,
@@ -465,6 +471,7 @@ function buildRouteData() {
     eyebrow: plan.eyebrow,
     subtitle: plan.subtitle,
     race: plan.race,
+    liveTracking: plan.liveTracking || null,
     nutrition: plan.nutrition,
     course: {
       points: course.points,
@@ -483,6 +490,43 @@ function buildRouteData() {
       };
     })
   };
+}
+
+function defaultLiveData() {
+  return {
+    fetchedAt: null,
+    sourceUrl: plan.liveTracking?.runnerUrl || null,
+    currentEvent: null,
+    runner: {
+      resume: {
+        bib: null,
+        info: { fullname: null },
+        prediction: {
+          lastPointId: null,
+          lastPassing: null,
+          nextPointId: null,
+          nextPointPrediction: null,
+          finishPrediction: null
+        }
+      },
+      detail: {
+        passings: []
+      }
+    }
+  };
+}
+
+function loadLiveData() {
+  if (!fs.existsSync(LIVE_DATA_PATH)) return defaultLiveData();
+  try {
+    return {
+      ...defaultLiveData(),
+      ...JSON.parse(fs.readFileSync(LIVE_DATA_PATH, "utf8"))
+    };
+  } catch (error) {
+    console.warn(`Could not parse ${path.relative(ROOT, LIVE_DATA_PATH)}: ${error.message}`);
+    return defaultLiveData();
+  }
 }
 
 function renderGuideHtml() {
@@ -569,6 +613,7 @@ ${renderSources()}
 function renderRouteTrackerHtml() {
   const routeData = buildRouteData();
   const routeJson = jsonForScript(routeData);
+  const liveJson = jsonForScript(loadLiveData());
 
   return `<!doctype html>
 <html lang="en">
@@ -605,23 +650,44 @@ ${styles}
       <article class="station-panel" id="station-panel">
         <div class="station-route-summary">
           <div class="station-overline" id="station-overline">Current leg</div>
+          <div class="live-status" id="live-status">
+            <span class="live-dot" aria-hidden="true"></span>
+            <strong id="live-status-title">Planned schedule</strong>
+            <span id="live-status-detail">Waiting for UTMB checkpoint updates.</span>
+          </div>
           <div class="station-route-line">
             <div class="station-route-stop">
               <span id="station-meta">Depart 5:00 AM</span>
               <h2 id="station-name">China Wall Start</h2>
+              <div class="time-stack">
+                <span><strong>Expected</strong> <em id="station-expected-time">5:00 AM</em></span>
+                <span><strong>Actual</strong> <em id="station-actual-time">--</em></span>
+              </div>
             </div>
             <span class="station-route-arrow">to</span>
             <div class="station-route-stop">
               <span id="arrival-meta">Arrive 7:25 AM</span>
               <strong id="next-stop">Deadwood 1</strong>
+              <div class="time-stack">
+                <span><strong>Expected</strong> <em id="next-expected-time">6:27 AM</em></span>
+                <span><strong>Adjusted</strong> <em id="next-adjusted-time">6:27 AM</em></span>
+              </div>
             </div>
           </div>
           <div class="station-tags" id="station-tags"></div>
           <p class="station-note" id="station-note"></p>
         </div>
 
-        <div class="station-grid station-leg-metrics" id="station-grid" aria-label="Current leg distance and elevation">
-          <div class="station-section-title">Leg effort</div>
+        <div class="station-grid station-leg-metrics" id="station-grid" aria-label="Current leg distance and timing">
+          <div class="station-section-title">Time and leg</div>
+          <div class="station-metric primary">
+            <span>Expected next</span>
+            <strong id="expected-next">6:27 AM</strong>
+          </div>
+          <div class="station-metric">
+            <span>Adjusted next</span>
+            <strong id="adjusted-next">6:27 AM</strong>
+          </div>
           <div class="station-metric primary">
             <span>Distance</span>
             <strong id="next-leg">10.1 mi</strong>
@@ -633,7 +699,7 @@ ${styles}
         </div>
 
         <div class="station-grid station-nutrition-metrics" id="station-nutrition" aria-label="Nutrition needed for this leg">
-          <div class="station-section-title">Fuel for this leg</div>
+          <div class="station-section-title">Fuel and delta</div>
           <div class="station-metric">
             <span>Carbs</span>
             <strong id="next-fuel">220 g</strong>
@@ -645,6 +711,10 @@ ${styles}
           <div class="station-metric">
             <span>Fluid</span>
             <strong id="leg-fluid">1.2-1.8 L</strong>
+          </div>
+          <div class="station-metric">
+            <span>Schedule delta</span>
+            <strong id="schedule-delta">On plan</strong>
           </div>
         </div>
 
@@ -695,6 +765,7 @@ ${styles}
   <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.1/maptiler-sdk.umd.min.js"></script>
   <script>
     const routeData = ${routeJson};
+    const initialLiveData = ${liveJson};
 
     const state = {
       currentMile: 0,
@@ -702,7 +773,9 @@ ${styles}
       touchY: null,
       raf: null,
       map: null,
-      profileDragging: false
+      profileDragging: false,
+      liveData: initialLiveData,
+      liveSummary: null
     };
 
     const elements = {
@@ -710,19 +783,29 @@ ${styles}
       elevationLabel: document.getElementById("route-elevation-label"),
       stationPanel: document.getElementById("station-panel"),
       stationOverline: document.getElementById("station-overline"),
+      liveStatus: document.getElementById("live-status"),
+      liveStatusTitle: document.getElementById("live-status-title"),
+      liveStatusDetail: document.getElementById("live-status-detail"),
       stationName: document.getElementById("station-name"),
       stationMeta: document.getElementById("station-meta"),
       arrivalMeta: document.getElementById("arrival-meta"),
+      stationExpectedTime: document.getElementById("station-expected-time"),
+      stationActualTime: document.getElementById("station-actual-time"),
+      nextExpectedTime: document.getElementById("next-expected-time"),
+      nextAdjustedTime: document.getElementById("next-adjusted-time"),
       stationTags: document.getElementById("station-tags"),
       stationNote: document.getElementById("station-note"),
       stationGrid: document.getElementById("station-grid"),
       stationResupply: document.getElementById("station-resupply"),
       nextStop: document.getElementById("next-stop"),
+      expectedNext: document.getElementById("expected-next"),
+      adjustedNext: document.getElementById("adjusted-next"),
       nextLeg: document.getElementById("next-leg"),
       legElevation: document.getElementById("leg-elevation"),
       nextFuel: document.getElementById("next-fuel"),
       legSodium: document.getElementById("leg-sodium"),
       legFluid: document.getElementById("leg-fluid"),
+      scheduleDelta: document.getElementById("schedule-delta"),
       resupplyLabel: document.getElementById("resupply-label"),
       resupplyBlock: document.getElementById("resupply-block"),
       resupplyNutrition: document.getElementById("resupply-nutrition"),
@@ -843,6 +926,149 @@ ${styles}
       return formatNumber(nutrition.carbs) + " g carbs | " +
         formatNumber(nutrition.sodiumLow) + "-" + formatNumber(nutrition.sodiumHigh) + " mg Na | " +
         formatFluid(nutrition.fluidLow) + "-" + formatFluid(nutrition.fluidHigh) + " L";
+    }
+
+    function parsePlanDateTime(timeText) {
+      if (!routeData.race.dateLocal || !timeText) return null;
+      const match = String(timeText).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (!match) return null;
+      let hour = Number(match[1]) % 12;
+      const minute = Number(match[2]);
+      const meridiem = match[3].toUpperCase();
+      if (meridiem === "PM") hour += 12;
+      const [year, month, day] = routeData.race.dateLocal.split("-").map(Number);
+      const timeZone = routeData.liveTracking?.timezone || "America/Los_Angeles";
+      const utcGuess = Date.UTC(year, month - 1, day, hour, minute, 0);
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+      });
+      const parts = Object.fromEntries(
+        formatter
+          .formatToParts(new Date(utcGuess))
+          .filter((part) => part.type !== "literal")
+          .map((part) => [part.type, part.value])
+      );
+      const zonedUtc = Date.UTC(
+        Number(parts.year),
+        Number(parts.month) - 1,
+        Number(parts.day),
+        Number(parts.hour),
+        Number(parts.minute),
+        Number(parts.second)
+      );
+      return new Date(utcGuess - (zonedUtc - utcGuess));
+    }
+
+    function formatClock(value) {
+      if (!value) return "--";
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return "--";
+      return new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: routeData.liveTracking?.timezone || "America/Los_Angeles"
+      }).format(date);
+    }
+
+    function formatScheduleDelta(minutes) {
+      if (minutes === null || minutes === undefined || Number.isNaN(minutes)) return "On plan";
+      if (Math.abs(minutes) < 1) return "On plan";
+      const rounded = Math.round(minutes);
+      const absMinutes = Math.abs(rounded);
+      const hours = Math.floor(absMinutes / 60);
+      const mins = absMinutes % 60;
+      const label = hours ? hours + "h " + String(mins).padStart(2, "0") + "m" : mins + "m";
+      return (rounded > 0 ? "+" : "-") + label;
+    }
+
+    function actualTimeForPassing(passing) {
+      if (!passing) return null;
+      return passing.datetimeOut || passing.datetimeIn || null;
+    }
+
+    function summarizeLiveData() {
+      const mappings = routeData.liveTracking?.pointMappings || [];
+      const passings = state.liveData?.runner?.detail?.passings || [];
+      const passingsByPointId = new Map(passings.map((passing) => [passing.pointId, passing]));
+      const actualsByStop = {};
+      let lastActual = null;
+
+      mappings.forEach((mapping) => {
+        const passing = passingsByPointId.get(mapping.pointId);
+        const actual = actualTimeForPassing(passing);
+        if (!actual) return;
+        actualsByStop[mapping.stop] = actual;
+        const stop = routeData.stops.find((item) => item.name === mapping.stop);
+        if (stop && (!lastActual || stop.mile >= lastActual.stop.mile)) {
+          lastActual = { stop, actual };
+        }
+      });
+
+      const adjustedByStop = {};
+      if (lastActual) {
+        const anchorMs = new Date(lastActual.actual).getTime();
+        routeData.stops.forEach((stop) => {
+          const offsetMinutes = stop.plannedMinutesFromStart - lastActual.stop.plannedMinutesFromStart;
+          adjustedByStop[stop.name] = new Date(anchorMs + offsetMinutes * 60000).toISOString();
+        });
+      } else {
+        routeData.stops.forEach((stop) => {
+          const planned = parsePlanDateTime(stop.eta);
+          adjustedByStop[stop.name] = planned ? planned.toISOString() : null;
+        });
+      }
+
+      const fetchedAt = state.liveData?.fetchedAt || null;
+      return {
+        actualsByStop,
+        adjustedByStop,
+        lastActual,
+        fetchedAt,
+        runnerName: state.liveData?.runner?.resume?.info?.fullname || "Jonathan FOOKES",
+        bib: state.liveData?.runner?.resume?.bib || null
+      };
+    }
+
+    function setLiveStatus() {
+      const summary = state.liveSummary;
+      const hasActual = Boolean(summary?.lastActual);
+      elements.liveStatus.dataset.state = hasActual ? "live" : "planned";
+      elements.liveStatusTitle.textContent = hasActual
+        ? summary.runnerName + (summary.bib ? " • Bib " + summary.bib : "")
+        : "Planned schedule";
+      if (hasActual) {
+        elements.liveStatusDetail.textContent = "Last actual checkpoint: " + summary.lastActual.stop.name + " at " + formatClock(summary.lastActual.actual) +
+          (summary.fetchedAt ? " • refreshed " + formatClock(summary.fetchedAt) : "");
+      } else {
+        elements.liveStatusDetail.textContent = summary?.fetchedAt
+          ? "No UTMB checkpoint times yet. Last refresh " + formatClock(summary.fetchedAt) + "."
+          : "Waiting for UTMB checkpoint updates.";
+      }
+    }
+
+    async function refreshLiveData() {
+      try {
+        const response = await fetch("./live-runner.json", { cache: "no-store" });
+        if (!response.ok) return;
+        state.liveData = await response.json();
+        state.liveSummary = summarizeLiveData();
+        if (state.liveSummary.lastActual) {
+          state.currentMile = state.liveSummary.lastActual.stop.mile;
+          state.targetMile = state.currentMile;
+        }
+        setLiveStatus();
+        update(state.currentMile);
+      } catch (error) {
+        // Keep the built-in payload if the static live JSON is unavailable.
+      }
     }
 
     function legContext(stop, index) {
@@ -1385,6 +1611,14 @@ ${styles}
       const context = legContext(stop, index);
       const leg = context.leg;
       const fuel = leg ? nutritionForMinutes(leg.plannedMinutes) : null;
+      const live = state.liveSummary || summarizeLiveData();
+      const departExpected = parsePlanDateTime(context.depart.eta);
+      const departActual = live.actualsByStop[context.depart.name] || null;
+      const arriveExpected = context.arrive ? parsePlanDateTime(context.arrive.eta) : null;
+      const arriveAdjusted = context.arrive ? live.adjustedByStop[context.arrive.name] : null;
+      const scheduleDeltaMinutes = context.arrive && arriveExpected && arriveAdjusted
+        ? (new Date(arriveAdjusted).getTime() - arriveExpected.getTime()) / 60000
+        : null;
 
       elements.distanceLabel.textContent = formatMiles(mile) + " / " + formatMiles(totalMiles) + " mi";
       elements.elevationLabel.textContent = formatNumber(Math.round(currentCourse.eleFt)) + " ft";
@@ -1407,6 +1641,13 @@ ${styles}
       elements.stationMeta.textContent = "Depart " + context.depart.eta;
       elements.nextStop.textContent = context.arrive ? context.arrive.name : "Done";
       elements.arrivalMeta.textContent = context.arrive ? "Arrive " + context.arrive.eta : "";
+      elements.stationExpectedTime.textContent = formatClock(departExpected);
+      elements.stationActualTime.textContent = formatClock(departActual);
+      elements.nextExpectedTime.textContent = formatClock(arriveExpected);
+      elements.nextAdjustedTime.textContent = formatClock(arriveAdjusted);
+      elements.expectedNext.textContent = formatClock(arriveExpected);
+      elements.adjustedNext.textContent = formatClock(arriveAdjusted);
+      elements.scheduleDelta.textContent = formatScheduleDelta(scheduleDeltaMinutes);
       elements.stationTags.innerHTML = context.depart.tags.map((tag) => '<span class="badge ' + escapeHtml(tag.type || "default") + '">' + escapeHtml(tag.label) + "</span>").join("");
       elements.stationNote.textContent = context.complete && context.arrive ? context.arrive.note : context.depart.note;
 
@@ -1509,9 +1750,16 @@ ${styles}
       hideProfilePopup();
     });
 
+    state.liveSummary = summarizeLiveData();
+    if (state.liveSummary.lastActual) {
+      state.currentMile = state.liveSummary.lastActual.stop.mile;
+      state.targetMile = state.currentMile;
+    }
+    setLiveStatus();
     initProfile();
     initMap();
-    update(0);
+    update(state.currentMile);
+    refreshLiveData();
     if ("ResizeObserver" in window) {
       const observer = new ResizeObserver(() => {
         initProfile();
@@ -1535,15 +1783,26 @@ function validatePlan(data) {
       throw new Error(`Resupply from '${stop.name}' points to unknown stop '${stop.resupplyTo}'`);
     }
   }
+
+  if (data.liveTracking?.pointMappings) {
+    for (const mapping of data.liveTracking.pointMappings) {
+      if (!names.has(mapping.stop)) {
+        throw new Error(`Live tracking point '${mapping.pointId}' points to unknown stop '${mapping.stop}'`);
+      }
+    }
+  }
 }
 
 fs.mkdirSync(path.dirname(GUIDE_OUTPUT_PATH), { recursive: true });
 const guideHtml = renderGuideHtml();
+const liveData = loadLiveData();
 fs.writeFileSync(INDEX_OUTPUT_PATH, guideHtml);
 fs.writeFileSync(GUIDE_OUTPUT_PATH, guideHtml);
 fs.writeFileSync(TRACKER_OUTPUT_PATH, renderRouteTrackerHtml());
+fs.writeFileSync(LIVE_DATA_OUTPUT_PATH, JSON.stringify(liveData, null, 2) + "\n");
 fs.writeFileSync(NOJEKYLL_OUTPUT_PATH, "");
 console.log(`Generated ${path.relative(ROOT, INDEX_OUTPUT_PATH)}`);
 console.log(`Generated ${path.relative(ROOT, GUIDE_OUTPUT_PATH)}`);
 console.log(`Generated ${path.relative(ROOT, TRACKER_OUTPUT_PATH)}`);
+console.log(`Generated ${path.relative(ROOT, LIVE_DATA_OUTPUT_PATH)}`);
 console.log(`Generated ${path.relative(ROOT, NOJEKYLL_OUTPUT_PATH)}`);

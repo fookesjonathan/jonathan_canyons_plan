@@ -8,10 +8,12 @@ Generated race-day crew guide for the Canyons 100K.
 - `data/canyons-100k-course.gpx` is the official 2026 100K GPX used for the route tracker map and elevation profile.
 - `src/styles.css` is the report styling.
 - `scripts/generate.js` builds the HTML report and route tracker.
+- `scripts/fetch-live-data.js` pulls Jonathan FOOKES bib 1159 from UTMB Live into a static JSON file for GitHub Pages.
 - `scripts/review.js` builds the pages, captures Playwright screenshots, and checks mobile overflow, tap targets, tiny text, and route-tracker cursor movement.
 - `docs/index.html` is the GitHub Pages entrypoint.
 - `docs/canyons-100k-crew-guide.html` is the generated guide.
 - `docs/canyons-100k-route-tracker.html` is the generated full-screen route tracker.
+- `docs/live-runner.json` is the publishable live split cache used by the tracker on GitHub Pages.
 
 ## Common Changes
 
@@ -39,6 +41,12 @@ The guide intentionally keeps ETAs explicit because the displayed ETAs include p
 
 ```sh
 npm run build
+```
+
+To refresh the UTMB data first:
+
+```sh
+npm run refresh-live
 ```
 
 Open:
@@ -70,12 +78,12 @@ You can also open `docs/canyons-100k-route-tracker.html?maptiler_key=YOUR_LOCAL_
 
 ## GitHub Pages
 
-This repo is set up for local builds and branch-based GitHub Pages publishing.
+This repo is set up for GitHub Pages via GitHub Actions.
 
-1. Run `npm run build`.
-2. Commit the generated `docs/` files.
-3. In GitHub, set **Settings -> Pages -> Build and deployment -> Source** to **Deploy from a branch**.
-4. Select branch `main` and folder `/docs`.
+1. Push the repo to GitHub.
+2. In GitHub, set **Settings -> Pages -> Build and deployment -> Source** to **GitHub Actions**.
+3. The workflow in `.github/workflows/pages.yml` will build the site on pushes, on manual runs, and every 15 minutes.
+4. Scheduled runs fetch the UTMB runner page, write a fresh `docs/live-runner.json`, then deploy the updated static site.
 
 ## Visual Review
 
