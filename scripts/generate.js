@@ -1615,6 +1615,8 @@ ${styles}
       const departExpected = parsePlanDateTime(context.depart.eta);
       const departActual = live.actualsByStop[context.depart.name] || null;
       const arriveExpected = context.arrive ? parsePlanDateTime(context.arrive.eta) : null;
+      const departExpectedLabel = context.depart.eta || "--";
+      const arriveExpectedLabel = context.arrive?.eta || "--";
       const arriveAdjusted = context.arrive ? live.adjustedByStop[context.arrive.name] : null;
       const scheduleDeltaMinutes = context.arrive && arriveExpected && arriveAdjusted
         ? (new Date(arriveAdjusted).getTime() - arriveExpected.getTime()) / 60000
@@ -1641,11 +1643,11 @@ ${styles}
       elements.stationMeta.textContent = "Depart " + context.depart.eta;
       elements.nextStop.textContent = context.arrive ? context.arrive.name : "Done";
       elements.arrivalMeta.textContent = context.arrive ? "Arrive " + context.arrive.eta : "";
-      elements.stationExpectedTime.textContent = formatClock(departExpected);
+      elements.stationExpectedTime.textContent = departExpectedLabel;
       elements.stationActualTime.textContent = formatClock(departActual);
-      elements.nextExpectedTime.textContent = formatClock(arriveExpected);
+      elements.nextExpectedTime.textContent = arriveExpectedLabel;
       elements.nextAdjustedTime.textContent = formatClock(arriveAdjusted);
-      elements.expectedNext.textContent = formatClock(arriveExpected);
+      elements.expectedNext.textContent = arriveExpectedLabel;
       elements.adjustedNext.textContent = formatClock(arriveAdjusted);
       elements.scheduleDelta.textContent = formatScheduleDelta(scheduleDeltaMinutes);
       elements.stationTags.innerHTML = context.depart.tags.map((tag) => '<span class="badge ' + escapeHtml(tag.type || "default") + '">' + escapeHtml(tag.label) + "</span>").join("");
