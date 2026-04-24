@@ -272,9 +272,7 @@ function renderStop(stop, index) {
     : stop.note
       ? `<p class="note">${escapeHtml(stop.note)}</p>`
       : "";
-  const timingBox = stop.kind === "crew"
-    ? renderGuideStopTimes(stop, "card")
-    : `<div class="eta"><span>ETA</span>${escapeHtml(stop.eta)}</div>`;
+  const timingBox = renderGuideStopTimes(stop, "card");
 
   return `        <article class="${classForStop(stop)}">
           <div class="stop-top">
@@ -581,7 +579,7 @@ ${renderCrewStrip()}
     <section id="plan" aria-labelledby="plan-title">
       <div class="section-head">
         <h2 id="plan-title">Course Plan</h2>
-        <p>Each card shows the current stop, ETA, crew status, and the next-leg distance, climb/descent, planned split, pace, and fuel to consume before the next stop. Resupply bands sum the leg-fuel targets to the next crew stop or finish; add buffer for extra stop time, delays, and heat.</p>
+        <p>Each card shows the current stop, planned versus live timing, crew status, and the next-leg distance, climb/descent, planned split, pace, and fuel to consume before the next stop. Resupply bands sum the leg-fuel targets to the next crew stop or finish; add buffer for extra stop time, delays, and heat.</p>
       </div>
 
       <div class="course-list">

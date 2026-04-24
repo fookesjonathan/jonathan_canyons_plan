@@ -205,16 +205,18 @@ h1 {
 }
 
 .guide-stop-times-card {
-  min-width: 124px;
-  padding: 7px 8px;
+  min-width: 0;
+  width: min(100%, 154px);
+  padding: 6px 7px;
   border-radius: var(--radius);
   background: var(--trail-soft);
+  justify-self: end;
 }
 
 .guide-time-row {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 8px;
+  gap: 6px;
   align-items: baseline;
 }
 
@@ -229,7 +231,7 @@ h1 {
   min-width: 0;
   margin: 0;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.12;
   text-align: right;
 }
@@ -286,9 +288,9 @@ h2 {
 
 .stop-top {
   display: grid;
-  grid-template-columns: 54px 1fr auto;
+  grid-template-columns: 54px minmax(0, 1fr) minmax(132px, 154px);
   gap: 8px;
-  align-items: stretch;
+  align-items: start;
   padding: 10px;
 }
 
@@ -1454,7 +1456,7 @@ h2 {
   }
 
   .stop-top .guide-stop-times-card {
-    min-width: 146px;
+    width: min(100%, 160px);
   }
 
   .milebox {
@@ -1540,6 +1542,16 @@ h2 {
 
   .guide-time-row strong {
     font-size: 12px;
+  }
+
+  .stop-top {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .stop-top .guide-stop-times-card {
+    grid-column: 2;
+    justify-self: start;
+    width: min(100%, 190px);
   }
 
   .real-map-viz {
@@ -1800,10 +1812,11 @@ h2 {
     grid-template-columns: 54px minmax(0, 1fr);
   }
 
-  .stop-top .eta,
   .stop-top .guide-stop-times-card {
-    grid-column: 1 / -1;
-    margin-left: 62px;
+    grid-column: 2;
+    margin-left: 0;
+    width: 100%;
+    max-width: none;
   }
 }
 
@@ -2028,7 +2041,7 @@ h2 {
     <section id="plan" aria-labelledby="plan-title">
       <div class="section-head">
         <h2 id="plan-title">Course Plan</h2>
-        <p>Each card shows the current stop, ETA, crew status, and the next-leg distance, climb/descent, planned split, pace, and fuel to consume before the next stop. Resupply bands sum the leg-fuel targets to the next crew stop or finish; add buffer for extra stop time, delays, and heat.</p>
+        <p>Each card shows the current stop, planned versus live timing, crew status, and the next-leg distance, climb/descent, planned split, pace, and fuel to consume before the next stop. Resupply bands sum the leg-fuel targets to the next crew stop or finish; add buffer for extra stop time, delays, and heat.</p>
       </div>
 
       <div class="course-list">
@@ -2039,7 +2052,12 @@ h2 {
               <h3>China Wall Start</h3>
               <div class="badges"><span class="badge warn">No crew</span><span class="badge">Start</span></div>
             </div>
-            <div class="eta"><span>ETA</span>5:00 AM</div>
+            
+          <div class="guide-stop-times guide-stop-times-card" data-guide-stop-times data-stop-name="China Wall Start">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>5:00 AM</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>5:00 AM</strong></div>
+          </div>
           </div>
           <p class="note">Runner-only shuttle. Leave with the first long-leg fuel loaded.</p>
 
@@ -2068,7 +2086,12 @@ h2 {
               <h3>Deadwood 1</h3>
               <div class="badges"><span class="badge aid">Full aid</span><span class="badge warn">No crew</span></div>
             </div>
-            <div class="eta"><span>ETA</span>6:27 AM</div>
+            
+          <div class="guide-stop-times guide-stop-times-card" data-guide-stop-times data-stop-name="Deadwood 1">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>6:27 AM</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>6:27 AM</strong></div>
+          </div>
           </div>
           <p class="note">Refill and keep enough food for the Devils Thumb loop through Deadwood 2.</p>
 
@@ -2088,7 +2111,12 @@ h2 {
               <h3>Swinging Bridge</h3>
               <div class="badges"><span class="badge warn">Turnaround</span><span class="badge warn">No aid</span></div>
             </div>
-            <div class="eta"><span>ETA</span>6:59 AM</div>
+            
+          <div class="guide-stop-times guide-stop-times-card" data-guide-stop-times data-stop-name="Swinging Bridge">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>6:59 AM</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>6:59 AM</strong></div>
+          </div>
           </div>
           <p class="note">Reset for the steep climb back to Devils Thumb.</p>
 
@@ -2108,7 +2136,12 @@ h2 {
               <h3>Deadwood 2</h3>
               <div class="badges"><span class="badge aid">Full aid</span><span class="badge warn">No crew</span><span class="badge warn">Cut 11:30 AM</span></div>
             </div>
-            <div class="eta"><span>ETA</span>7:43 AM</div>
+            
+          <div class="guide-stop-times guide-stop-times-card" data-guide-stop-times data-stop-name="Deadwood 2">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>7:43 AM</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>7:43 AM</strong></div>
+          </div>
           </div>
           <p class="note">Refill for the push to first crew. Start heat management early.</p>
 
@@ -2196,7 +2229,12 @@ h2 {
               <h3>Cal 2</h3>
               <div class="badges"><span class="badge aid">Full aid</span><span class="badge warn">No crew</span></div>
             </div>
-            <div class="eta"><span>ETA</span>11:43 AM</div>
+            
+          <div class="guide-stop-times guide-stop-times-card" data-guide-stop-times data-stop-name="Cal 2">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>11:43 AM</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>11:43 AM</strong></div>
+          </div>
           </div>
           <p class="note">Long no-crew leg follows. Refill hard here.</p>
 
@@ -2250,7 +2288,12 @@ h2 {
               <h3>Mammoth Bar</h3>
               <div class="badges"><span class="badge aid">Full aid</span><span class="badge warn">No crew</span><span class="badge warn">Cut 10:15 PM</span></div>
             </div>
-            <div class="eta"><span>ETA</span>3:39 PM</div>
+            
+          <div class="guide-stop-times guide-stop-times-card" data-guide-stop-times data-stop-name="Mammoth Bar">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>3:39 PM</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>3:39 PM</strong></div>
+          </div>
           </div>
           <p class="note">Eat if possible. The finish is close enough to simplify, not close enough to stop fueling.</p>
 
@@ -2270,7 +2313,12 @@ h2 {
               <h3>Confluence</h3>
               <div class="badges"><span class="badge aid">Full aid</span><span class="badge warn">No crew</span></div>
             </div>
-            <div class="eta"><span>ETA</span>4:29 PM</div>
+            
+          <div class="guide-stop-times guide-stop-times-card" data-guide-stop-times data-stop-name="Confluence">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>4:29 PM</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>4:29 PM</strong></div>
+          </div>
           </div>
           <p class="note">Final aid. Calories, fluid, then climb to Auburn.</p>
 
@@ -2290,7 +2338,12 @@ h2 {
               <h3>Downtown Auburn Finish</h3>
               <div class="badges"><span class="badge crew">Crew</span><span class="badge">Goal finish</span><span class="badge warn">Cut 1:00 AM</span></div>
             </div>
-            <div class="eta"><span>ETA</span>5:25 PM</div>
+            
+          <div class="guide-stop-times guide-stop-times-card" data-guide-stop-times data-stop-name="Downtown Auburn Finish">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>5:25 PM</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>5:25 PM</strong></div>
+          </div>
           </div>
           <p class="note">Warm layer, dry shoes, simple food, and no complicated decisions.</p>
 
