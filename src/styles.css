@@ -191,6 +191,42 @@ h1 {
   line-height: 1.08;
 }
 
+.guide-stop-times {
+  display: grid;
+  gap: 3px;
+  margin-top: 7px;
+}
+
+.guide-stop-times-card {
+  min-width: 124px;
+  padding: 7px 8px;
+  border-radius: var(--radius);
+  background: var(--trail-soft);
+}
+
+.guide-time-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+
+.guide-time-row span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.guide-time-row strong {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.12;
+  text-align: right;
+}
+
 .crew-pill em {
   display: block;
   margin-top: 4px;
@@ -1410,6 +1446,10 @@ h2 {
     grid-template-columns: 64px 1fr 92px;
   }
 
+  .stop-top .guide-stop-times-card {
+    min-width: 146px;
+  }
+
   .milebox {
     min-height: 62px;
   }
@@ -1484,6 +1524,15 @@ h2 {
   .route-head-meta a {
     min-height: 44px;
     justify-content: center;
+  }
+
+  .guide-stop-times-card {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .guide-time-row strong {
+    font-size: 12px;
   }
 
   .real-map-viz {
@@ -1736,6 +1785,18 @@ h2 {
     overflow: visible;
     text-overflow: clip;
     white-space: normal;
+  }
+}
+
+@media (max-width: 560px) {
+  .stop-top {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .stop-top .eta,
+  .stop-top .guide-stop-times-card {
+    grid-column: 1 / -1;
+    margin-left: 62px;
   }
 }
 

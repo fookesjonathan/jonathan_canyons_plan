@@ -177,17 +177,29 @@ function renderStats() {
       </div>`;
 }
 
+function renderGuideStopTimes(stop, mode = "pill") {
+  const classes = mode === "card" ? "guide-stop-times guide-stop-times-card" : "guide-stop-times";
+  return `
+          <div class="${classes}" data-guide-stop-times data-stop-name="${escapeAttr(stop.name)}">
+            <div class="guide-time-row"><span>Planned</span><strong data-planned-time>${escapeHtml(stop.eta)}</strong></div>
+            <div class="guide-time-row"><span>Actual</span><strong data-actual-time>--</strong></div>
+            <div class="guide-time-row"><span>Updated</span><strong data-updated-time>${escapeHtml(stop.eta)}</strong></div>
+          </div>`;
+}
+
 function renderCrewStrip() {
   return `
       <div class="crew-strip" aria-label="Crew stops">
 ${plan.crewStops
-  .map(
-    (stop, index) => `        <div class="crew-pill">
+  .map((stop, index) => {
+    const routeStop = stopForName(stop.name) || stop;
+    return `        <div class="crew-pill">
           <span>Crew Stop ${index + 1}</span>
-          <strong>${escapeHtml(stop.name)} - ${escapeHtml(stop.eta)}</strong>
+          <strong>${escapeHtml(stop.name)}</strong>
+${renderGuideStopTimes(routeStop)}
           <em>Arrive by ${escapeHtml(stop.arriveBy)}. ${escapeHtml(stop.summary)}</em>
-        </div>`
-  )
+        </div>`;
+  })
   .join("\n")}
       </div>`;
 }
@@ -260,6 +272,9 @@ function renderStop(stop, index) {
     : stop.note
       ? `<p class="note">${escapeHtml(stop.note)}</p>`
       : "";
+  const timingBox = stop.kind === "crew"
+    ? renderGuideStopTimes(stop, "card")
+    : `<div class="eta"><span>ETA</span>${escapeHtml(stop.eta)}</div>`;
 
   return `        <article class="${classForStop(stop)}">
           <div class="stop-top">
@@ -268,7 +283,7 @@ function renderStop(stop, index) {
               <h3>${escapeHtml(stop.name)}</h3>
               <div class="badges">${renderTags(stop.tags)}</div>
             </div>
-            <div class="eta"><span>ETA</span>${escapeHtml(stop.eta)}</div>
+            ${timingBox}
           </div>
           ${bodyCopy}
 ${renderResupply(stop, index)}
@@ -530,6 +545,9 @@ function loadLiveData() {
 }
 
 function renderGuideHtml() {
+  const routeData = buildRouteData();
+  const routeJson = jsonForScript(routeData);
+  const liveJson = jsonForScript(loadLiveData());
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -605,6 +623,129 @@ ${renderSources()}
       <p class="small-note">${escapeHtml(plan.versionNote)}</p>
     </section>
   </main>
+  <script>
+    const guideRouteData = ${routeJson};
+    const guideInitialLiveData = ${liveJson};
+
+    function guideParsePlanDateTime(timeText) {
+      if (!guideRouteData.race.dateLocal || !timeText) return null;
+      const match = String(timeText).trim().match(/^(\\d{1,2}):(\\d{2})\\s*(AM|PM)$/i);
+      if (!match) return null;
+      let hour = Number(match[1]) % 12;
+      const minute = Number(match[2]);
+      if (match[3].toUpperCase() === "PM") hour += 12;
+      const [year, month, day] = guideRouteData.race.dateLocal.split("-").map(Number);
+      const timeZone = guideRouteData.liveTracking?.timezone || "America/Los_Angeles";
+      const utcGuess = Date.UTC(year, month - 1, day, hour, minute, 0);
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+      });
+      const parts = Object.fromEntries(
+        formatter
+          .formatToParts(new Date(utcGuess))
+          .filter((part) => part.type !== "literal")
+          .map((part) => [part.type, part.value])
+      );
+      const zonedUtc = Date.UTC(
+        Number(parts.year),
+        Number(parts.month) - 1,
+        Number(parts.day),
+        Number(parts.hour),
+        Number(parts.minute),
+        Number(parts.second)
+      );
+      return new Date(utcGuess - (zonedUtc - utcGuess));
+    }
+
+    function guideFormatClock(value) {
+      if (!value) return "--";
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return "--";
+      return new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: guideRouteData.liveTracking?.timezone || "America/Los_Angeles"
+      }).format(date);
+    }
+
+    function guideActualTimeForPassing(passing) {
+      if (!passing) return null;
+      return passing.datetimeOut || passing.datetimeIn || null;
+    }
+
+    function guideSummarizeLiveData(liveData) {
+      const mappings = guideRouteData.liveTracking?.pointMappings || [];
+      const passings = liveData?.runner?.detail?.passings || [];
+      const passingsByPointId = new Map(passings.map((passing) => [passing.pointId, passing]));
+      const actualsByStop = {};
+      let lastActual = null;
+
+      mappings.forEach((mapping) => {
+        const passing = passingsByPointId.get(mapping.pointId);
+        const actual = guideActualTimeForPassing(passing);
+        if (!actual) return;
+        actualsByStop[mapping.stop] = actual;
+        const stop = guideRouteData.stops.find((item) => item.name === mapping.stop);
+        if (stop && (!lastActual || stop.mile >= lastActual.stop.mile)) {
+          lastActual = { stop, actual };
+        }
+      });
+
+      const adjustedByStop = {};
+      if (lastActual) {
+        const anchorMs = new Date(lastActual.actual).getTime();
+        guideRouteData.stops.forEach((stop) => {
+          const offsetMinutes = stop.plannedMinutesFromStart - lastActual.stop.plannedMinutesFromStart;
+          adjustedByStop[stop.name] = new Date(anchorMs + offsetMinutes * 60000).toISOString();
+        });
+      } else {
+        guideRouteData.stops.forEach((stop) => {
+          const planned = guideParsePlanDateTime(stop.eta);
+          adjustedByStop[stop.name] = planned ? planned.toISOString() : null;
+        });
+      }
+
+      return { actualsByStop, adjustedByStop, lastActual };
+    }
+
+    function updateGuideStopTimes(liveData) {
+      const summary = guideSummarizeLiveData(liveData);
+      document.querySelectorAll("[data-guide-stop-times]").forEach((element) => {
+        const stopName = element.getAttribute("data-stop-name");
+        const stop = guideRouteData.stops.find((item) => item.name === stopName);
+        if (!stop) return;
+        const planned = stop.eta || "--";
+        const actual = summary.actualsByStop[stopName] || null;
+        const updated = actual || summary.adjustedByStop[stopName] || null;
+        element.querySelector("[data-planned-time]").textContent = planned;
+        element.querySelector("[data-actual-time]").textContent = guideFormatClock(actual);
+        element.querySelector("[data-updated-time]").textContent = updated ? guideFormatClock(updated) : planned;
+      });
+    }
+
+    async function refreshGuideLiveData() {
+      try {
+        const response = await fetch("./live-runner.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("Failed to load live runner data");
+        const liveData = await response.json();
+        updateGuideStopTimes(liveData);
+      } catch (error) {
+        updateGuideStopTimes(guideInitialLiveData);
+      }
+    }
+
+    updateGuideStopTimes(guideInitialLiveData);
+    window.setInterval(refreshGuideLiveData, guideRouteData.liveTracking?.refreshMs || 60000);
+    refreshGuideLiveData();
+  </script>
 </body>
 </html>
 `;
