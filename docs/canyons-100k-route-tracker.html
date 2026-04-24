@@ -1461,7 +1461,8 @@ h2 {
     display: grid;
     grid-template-rows: auto minmax(300px, 52svh);
     gap: 10px;
-    padding: 8px 0 0;
+    padding: 8px 0 12px;
+    border-bottom: 0;
     background: #f4f7f5;
   }
 
@@ -1495,6 +1496,8 @@ h2 {
 
   .real-map-viz {
     min-height: min(62svh, 420px);
+    overflow: hidden;
+    border-bottom: 1px solid rgba(24, 32, 29, 0.12);
   }
 
   .maplibre-route-map {
@@ -1533,10 +1536,13 @@ h2 {
   }
 
   .route-details {
+    position: relative;
+    z-index: 6;
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
     gap: 0;
     padding: 0;
+    background: #f4f7f5;
   }
 
   .route-control {
