@@ -216,7 +216,7 @@
         { "label": "Aid", "type": "aid" },
         { "label": "Cut 7:45 PM", "type": "warn" }
       ],
-      "crewCallout": "CREW HERE: arrive by 1:00 PM and meet near the aid station. Have the go-bag ready, enough Naak gels for the next segment, and be ready to take the bladder and fill it to the 1L mark. Optional extra filled bottle ready too. Last handoff: lights, warmth, calories through the finish, decisive exit.",
+      "crewCallout": "CREW HERE: arrive by 1:00 PM and meet near the aid station. Have the go-bag ready, enough Naak gels for the next segment, and be ready to take the bladder and fill it to the 1L mark. Optional extra filled bottle ready too. Last handoff: calories through the finish, roast / pep talk, confidence, and decisive exit.",
       "resupplyTo": "Downtown Auburn Finish",
       "resupplyLabel": "Finish",
       "resupplyNote": "Final personal-fuel load. Add light, warm layer, and enough finish fuel to avoid bargaining.",
@@ -293,7 +293,7 @@
     },
     {
       "name": "Drivers Flat",
-      "detail": "Meet near the aid station with the go-bag, enough Naak gels for the next segment, bladder refill to the 1L mark, and an optional extra filled bottle. Final handoff: light, warmth, finish fuel, confidence, and send."
+      "detail": "Meet near the aid station with the go-bag, enough Naak gels for the next segment, bladder refill to the 1L mark, and an optional extra filled bottle. Final handoff: finish fuel, roast / pep talk, confidence, and send."
     }
   ],
   "maps": [
