@@ -320,6 +320,11 @@
       "title": "Official Aid Chart",
       "url": "https://res.cloudinary.com/utmb-world/image/upload/v1775774030/canyons/2026/Aid%20Station%20Charts/2026_The_Canyons_Endurance_Runs_by_UTMB_100k_Aid_Station_Chart_Imperial_e64146a241.pdf.pdf",
       "label": "Miles, elevation, cutoffs, crew, and drop-bag locations"
+    },
+    {
+      "title": "Jonathan Live Tracker",
+      "url": "https://live.utmb.world/canyons/2026/runners/1159",
+      "label": "Live runner page for Jonathan FOOKES, bib 1159"
     }
   ]
 }
