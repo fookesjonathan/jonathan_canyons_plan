@@ -35,13 +35,164 @@ function emptyPayload() {
 }
 
 function normalizePayload(payload) {
-  const pageProps = payload?.props?.pageProps || {};
+  const pageProps = extractPageProps(payload);
   return {
     fetchedAt: new Date().toISOString(),
     sourceUrl: runnerUrl,
     currentEvent: pageProps.currentEvent || null,
     runner: pageProps.runner || emptyPayload().runner
   };
+}
+
+function extractPageProps(payload) {
+  if (!payload || typeof payload !== "object") return {};
+  if (payload.props?.pageProps) return payload.props.pageProps;
+  if (payload.pageProps) return payload.pageProps;
+  if (payload.currentEvent || payload.runner) return payload;
+  return {};
+}
+
+function looksLikeRunnerPayload(payload) {
+  const pageProps = extractPageProps(payload);
+  return Boolean(
+    pageProps &&
+      typeof pageProps === "object" &&
+      (pageProps.runner || pageProps.currentEvent)
+  );
+}
+
+function safeParseJson(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function scriptContents(html) {
+  return Array.from(
+    html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi),
+    (match) => match[1]
+  );
+}
+
+function parseJsonAssignments(script) {
+  const assignmentPatterns = [
+    /(?:window\.|self\.)?__NEXT_DATA__\s*=\s*(\{[\s\S]*\})\s*;?/,
+    /(?:window\.|self\.)?NEXT_DATA\s*=\s*(\{[\s\S]*\})\s*;?/,
+    /(?:window\.|self\.)?__INITIAL_STATE__\s*=\s*(\{[\s\S]*\})\s*;?/
+  ];
+
+  for (const pattern of assignmentPatterns) {
+    const match = script.match(pattern);
+    if (!match) continue;
+    const parsed = safeParseJson(match[1]);
+    if (looksLikeRunnerPayload(parsed)) return parsed;
+  }
+
+  return null;
+}
+
+function parseCandidateScripts(html) {
+  for (const script of scriptContents(html)) {
+    const trimmed = script.trim();
+    if (!trimmed) continue;
+
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      const parsed = safeParseJson(trimmed);
+      if (looksLikeRunnerPayload(parsed)) return parsed;
+    }
+
+    if (/pageProps|currentEvent|runner/.test(trimmed)) {
+      const parsedAssignment = parseJsonAssignments(trimmed);
+      if (looksLikeRunnerPayload(parsedAssignment)) return parsedAssignment;
+    }
+  }
+
+  return null;
+}
+
+function extractBalancedJsonObject(text, startIndex) {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = startIndex; index < text.length; index += 1) {
+    const char = text[index];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === "\"") {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === "\"") {
+      inString = true;
+      continue;
+    }
+
+    if (char === "{") {
+      depth += 1;
+      continue;
+    }
+
+    if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return text.slice(startIndex, index + 1);
+      }
+    }
+  }
+
+  return null;
+}
+
+function parseLooseHtmlJson(html) {
+  const markers = [
+    "\"props\":{\"pageProps\":",
+    "\"pageProps\":",
+    "\"currentEvent\":",
+    "\"runner\":"
+  ];
+
+  for (const marker of markers) {
+    const markerIndex = html.indexOf(marker);
+    if (markerIndex < 0) continue;
+
+    let objectStart = html.lastIndexOf("{", markerIndex);
+    while (objectStart >= 0) {
+      const candidate = extractBalancedJsonObject(html, objectStart);
+      if (!candidate) break;
+      const parsed = safeParseJson(candidate);
+      if (looksLikeRunnerPayload(parsed)) return parsed;
+      objectStart = html.lastIndexOf("{", objectStart - 1);
+    }
+  }
+
+  return null;
+}
+
+function parseUtmbPayload(html) {
+  const nextDataMatch = html.match(
+    /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/i
+  );
+  if (nextDataMatch) {
+    const parsed = safeParseJson(nextDataMatch[1]);
+    if (looksLikeRunnerPayload(parsed)) return parsed;
+  }
+
+  const scriptPayload = parseCandidateScripts(html);
+  if (scriptPayload) return scriptPayload;
+
+  const loosePayload = parseLooseHtmlJson(html);
+  if (loosePayload) return loosePayload;
+
+  return null;
 }
 
 async function main() {
@@ -60,17 +211,27 @@ async function main() {
   }
 
   const html = await response.text();
-  const match = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/);
-  if (!match) {
-    throw new Error("UTMB page did not include __NEXT_DATA__");
+  const payload = parseUtmbPayload(html);
+  if (!payload) {
+    throw new Error("UTMB page did not include a recognizable runner payload");
   }
 
-  const normalized = normalizePayload(JSON.parse(match[1]));
+  const normalized = normalizePayload(payload);
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(normalized, null, 2) + "\n");
   console.log(`Wrote ${path.relative(ROOT, OUTPUT_PATH)}`);
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  emptyPayload,
+  extractPageProps,
+  looksLikeRunnerPayload,
+  normalizePayload,
+  parseUtmbPayload
+};
