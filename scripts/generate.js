@@ -574,6 +574,10 @@ ${styles}
       <p class="subtitle">${escapeHtml(plan.subtitle)}</p>
 ${renderStats()}
 ${renderCrewStrip()}
+      <div class="guide-live-status" id="guide-live-status" data-state="planned" aria-live="polite">
+        <strong id="guide-live-status-title">UTMB live timing</strong>
+        <span id="guide-live-status-detail">Checking the latest saved UTMB update.</span>
+      </div>
     </header>
 
     <section id="plan" aria-labelledby="plan-title">
@@ -624,6 +628,15 @@ ${renderSources()}
   <script>
     const guideRouteData = ${routeJson};
     const guideInitialLiveData = ${liveJson};
+    const guideLiveStatus = {
+      box: document.getElementById("guide-live-status"),
+      title: document.getElementById("guide-live-status-title"),
+      detail: document.getElementById("guide-live-status-detail")
+    };
+    const GUIDE_REFRESH_GRACE_MS = Math.max(
+      guideRouteData.liveTracking?.refreshMs || 60000,
+      15 * 60 * 1000
+    ) * 3;
 
     function guideParsePlanDateTime(timeText) {
       if (!guideRouteData.race.dateLocal || !timeText) return null;
@@ -714,6 +727,63 @@ ${renderSources()}
       return { actualsByStop, adjustedByStop, lastActual };
     }
 
+    function guideLiveStatusSnapshot(liveData, refreshFailed) {
+      const summary = guideSummarizeLiveData(liveData);
+      const fetchedAt = liveData?.fetchedAt ? new Date(liveData.fetchedAt) : null;
+      const fetchedAtValid = fetchedAt && !Number.isNaN(fetchedAt.getTime());
+      const isStale = fetchedAtValid
+        ? Date.now() - fetchedAt.getTime() > GUIDE_REFRESH_GRACE_MS
+        : false;
+
+      if (refreshFailed) {
+        return {
+          state: "error",
+          title: "UTMB refresh unavailable",
+          detail: fetchedAtValid
+            ? "Showing the last successful UTMB update from " + guideFormatClock(fetchedAt) + "."
+            : "Showing planned times until the UTMB feed is available again."
+        };
+      }
+
+      if (isStale) {
+        return {
+          state: "stale",
+          title: "UTMB refresh delayed",
+          detail: "The last successful UTMB update was " + guideFormatClock(fetchedAt) + ". Showing saved data until refresh resumes."
+        };
+      }
+
+      if (summary.lastActual) {
+        return {
+          state: "live",
+          title: "UTMB live timing active",
+          detail: "Last actual checkpoint: " + summary.lastActual.stop.name + " at " + guideFormatClock(summary.lastActual.actual) +
+            (fetchedAtValid ? " • saved " + guideFormatClock(fetchedAt) : "")
+        };
+      }
+
+      if (fetchedAtValid) {
+        return {
+          state: "planned",
+          title: "UTMB live timing active",
+          detail: "No checkpoint times yet. Last successful UTMB update " + guideFormatClock(fetchedAt) + "."
+        };
+      }
+
+      return {
+        state: "planned",
+        title: "UTMB live timing pending",
+        detail: "Showing planned times until UTMB publishes checkpoint data."
+      };
+    }
+
+    function updateGuideLiveStatus(liveData, refreshFailed) {
+      const status = guideLiveStatusSnapshot(liveData, refreshFailed);
+      guideLiveStatus.box.dataset.state = status.state;
+      guideLiveStatus.title.textContent = status.title;
+      guideLiveStatus.detail.textContent = status.detail;
+    }
+
     function updateGuideStopTimes(liveData) {
       const summary = guideSummarizeLiveData(liveData);
       document.querySelectorAll("[data-guide-stop-times]").forEach((element) => {
@@ -735,12 +805,15 @@ ${renderSources()}
         if (!response.ok) throw new Error("Failed to load live runner data");
         const liveData = await response.json();
         updateGuideStopTimes(liveData);
+        updateGuideLiveStatus(liveData, false);
       } catch (error) {
         updateGuideStopTimes(guideInitialLiveData);
+        updateGuideLiveStatus(guideInitialLiveData, true);
       }
     }
 
     updateGuideStopTimes(guideInitialLiveData);
+    updateGuideLiveStatus(guideInitialLiveData, false);
     window.setInterval(refreshGuideLiveData, guideRouteData.liveTracking?.refreshMs || 60000);
     refreshGuideLiveData();
   </script>
@@ -912,7 +985,8 @@ ${styles}
       map: null,
       profileDragging: false,
       liveData: initialLiveData,
-      liveSummary: null
+      liveSummary: null,
+      liveRefreshFailed: false
     };
 
     const elements = {
@@ -1174,7 +1248,28 @@ ${styles}
 
     function setLiveStatus() {
       const summary = state.liveSummary;
+      const fetchedAt = summary?.fetchedAt ? new Date(summary.fetchedAt) : null;
+      const fetchedAtValid = fetchedAt && !Number.isNaN(fetchedAt.getTime());
+      const staleAfterMs = Math.max(routeData.liveTracking?.refreshMs || 60000, 15 * 60 * 1000) * 3;
+      const isStale = fetchedAtValid ? Date.now() - fetchedAt.getTime() > staleAfterMs : false;
       const hasActual = Boolean(summary?.lastActual);
+
+      if (state.liveRefreshFailed) {
+        elements.liveStatus.dataset.state = "error";
+        elements.liveStatusTitle.textContent = "UTMB refresh unavailable";
+        elements.liveStatusDetail.textContent = fetchedAtValid
+          ? "Showing the last successful UTMB update from " + formatClock(fetchedAt) + "."
+          : "Showing planned times until the UTMB feed is available again.";
+        return;
+      }
+
+      if (isStale) {
+        elements.liveStatus.dataset.state = "stale";
+        elements.liveStatusTitle.textContent = "UTMB refresh delayed";
+        elements.liveStatusDetail.textContent = "Last successful UTMB update " + formatClock(fetchedAt) + ". Showing saved data until refresh resumes.";
+        return;
+      }
+
       elements.liveStatus.dataset.state = hasActual ? "live" : "planned";
       elements.liveStatusTitle.textContent = hasActual
         ? summary.runnerName + (summary.bib ? " • Bib " + summary.bib : "")
@@ -1183,8 +1278,8 @@ ${styles}
         elements.liveStatusDetail.textContent = "Last actual checkpoint: " + summary.lastActual.stop.name + " at " + formatClock(summary.lastActual.actual) +
           (summary.fetchedAt ? " • refreshed " + formatClock(summary.fetchedAt) : "");
       } else {
-        elements.liveStatusDetail.textContent = summary?.fetchedAt
-          ? "No UTMB checkpoint times yet. Last refresh " + formatClock(summary.fetchedAt) + "."
+        elements.liveStatusDetail.textContent = fetchedAtValid
+          ? "No UTMB checkpoint times yet. Last successful UTMB update " + formatClock(fetchedAt) + "."
           : "Waiting for UTMB checkpoint updates.";
       }
     }
@@ -1195,6 +1290,7 @@ ${styles}
         if (!response.ok) return;
         state.liveData = await response.json();
         state.liveSummary = summarizeLiveData();
+        state.liveRefreshFailed = false;
         if (state.liveSummary.lastActual) {
           state.currentMile = state.liveSummary.lastActual.stop.mile;
           state.targetMile = state.currentMile;
@@ -1202,7 +1298,8 @@ ${styles}
         setLiveStatus();
         update(state.currentMile);
       } catch (error) {
-        // Keep the built-in payload if the static live JSON is unavailable.
+        state.liveRefreshFailed = true;
+        setLiveStatus();
       }
     }
 

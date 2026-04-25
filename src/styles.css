@@ -199,29 +199,33 @@ h1 {
 
 .guide-stop-times-card {
   min-width: 0;
-  width: min(100%, 154px);
+  width: min(100%, 170px);
   padding: 6px 7px;
+  box-sizing: border-box;
+  overflow: hidden;
   border-radius: var(--radius);
   background: var(--trail-soft);
   justify-self: end;
 }
 
 .guide-time-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  display: flex;
+  justify-content: space-between;
   gap: 6px;
   align-items: baseline;
 }
 
 .guide-time-row span {
+  flex: 0 0 58px;
   color: var(--muted);
   font-size: 10px;
   font-weight: 900;
+  white-space: nowrap;
   text-transform: uppercase;
 }
 
 .guide-time-row strong {
-  min-width: 0;
+  flex: 0 0 auto;
   margin: 0;
   color: var(--ink);
   font-size: 12px;
@@ -235,6 +239,46 @@ h1 {
   color: var(--muted);
   font-size: 13px;
   font-style: normal;
+}
+
+.guide-live-status {
+  display: grid;
+  gap: 3px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--trail);
+  border-radius: var(--radius);
+  background: #f7fbfa;
+}
+
+.guide-live-status strong {
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.guide-live-status span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.guide-live-status[data-state="live"] {
+  border-color: rgba(15, 118, 110, 0.26);
+  border-left-color: var(--trail);
+  background: #f3fbf9;
+}
+
+.guide-live-status[data-state="stale"] {
+  border-color: rgba(184, 74, 24, 0.26);
+  border-left-color: #b84a18;
+  background: #fff6ef;
+}
+
+.guide-live-status[data-state="error"] {
+  border-color: rgba(167, 28, 28, 0.24);
+  border-left-color: #a71c1c;
+  background: #fff2f2;
 }
 
 section {
@@ -281,7 +325,7 @@ h2 {
 
 .stop-top {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) minmax(132px, 154px);
+  grid-template-columns: 54px minmax(0, 1fr) minmax(184px, 212px);
   gap: 8px;
   align-items: start;
   padding: 10px;
@@ -967,6 +1011,16 @@ h2 {
   background: #f3fbf9;
 }
 
+.live-status[data-state="stale"] {
+  border-color: rgba(184, 74, 24, 0.26);
+  background: #fff6ef;
+}
+
+.live-status[data-state="error"] {
+  border-color: rgba(167, 28, 28, 0.24);
+  background: #fff2f2;
+}
+
 .live-dot {
   width: 10px;
   height: 10px;
@@ -978,6 +1032,16 @@ h2 {
 .live-status[data-state="live"] .live-dot {
   background: var(--trail);
   box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+}
+
+.live-status[data-state="stale"] .live-dot {
+  background: #b84a18;
+  box-shadow: 0 0 0 4px rgba(184, 74, 24, 0.14);
+}
+
+.live-status[data-state="error"] .live-dot {
+  background: #a71c1c;
+  box-shadow: 0 0 0 4px rgba(167, 28, 28, 0.12);
 }
 
 .live-status strong {
@@ -1052,7 +1116,20 @@ h2 {
   font-style: normal;
   font-weight: 900;
   letter-spacing: 0;
+  white-space: nowrap;
   text-transform: none;
+}
+
+#expected-next,
+#adjusted-next,
+#station-expected-time,
+#station-actual-time,
+#next-expected-time,
+#next-adjusted-time,
+[data-planned-time],
+[data-actual-time],
+[data-updated-time] {
+  white-space: nowrap;
 }
 
 .station-tags {
@@ -1445,11 +1522,11 @@ h2 {
   }
 
   .stop-top {
-    grid-template-columns: 64px 1fr 92px;
+    grid-template-columns: 64px minmax(0, 1fr) minmax(184px, 212px);
   }
 
   .stop-top .guide-stop-times-card {
-    width: min(100%, 160px);
+    width: 100%;
   }
 
   .milebox {
@@ -1544,7 +1621,7 @@ h2 {
   .stop-top .guide-stop-times-card {
     grid-column: 2;
     justify-self: start;
-    width: min(100%, 190px);
+    width: min(100%, 198px);
   }
 
   .real-map-viz {
@@ -1810,6 +1887,19 @@ h2 {
     margin-left: 0;
     width: 100%;
     max-width: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .stop-top {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .stop-top .guide-stop-times-card {
+    grid-column: 2;
+    justify-self: start;
+    width: min(100%, 198px);
+    margin-top: 4px;
   }
 }
 
