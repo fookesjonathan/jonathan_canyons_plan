@@ -9,24 +9,6 @@
     "finishGoal": "5:30 PM",
     "courseDistanceMi": 61.6
   },
-  "liveTracking": {
-    "provider": "utmb",
-    "runnerUrl": "https://live.utmb.world/canyons/2026/runners/1159",
-    "refreshMs": 60000,
-    "timezone": "America/Los_Angeles",
-    "pointMappings": [
-      { "pointId": 0, "stop": "China Wall Start" },
-      { "pointId": 4, "stop": "Deadwood 1" },
-      { "pointId": 12, "stop": "Swinging Bridge" },
-      { "pointId": 14, "stop": "Deadwood 2" },
-      { "pointId": 16, "stop": "Michigan Bluff" },
-      { "pointId": 18, "stop": "Foresthill" },
-      { "pointId": 20, "stop": "Cal 2" },
-      { "pointId": 22, "stop": "Drivers Flat" },
-      { "pointId": 24, "stop": "Confluence" },
-      { "pointId": 100, "stop": "Downtown Auburn Finish" }
-    ]
-  },
   "nutrition": {
     "carbsPerHour": 90,
     "sodiumMgPerHour": {
@@ -320,11 +302,6 @@
       "title": "Official Aid Chart",
       "url": "https://res.cloudinary.com/utmb-world/image/upload/v1775774030/canyons/2026/Aid%20Station%20Charts/2026_The_Canyons_Endurance_Runs_by_UTMB_100k_Aid_Station_Chart_Imperial_e64146a241.pdf.pdf",
       "label": "Miles, elevation, cutoffs, crew, and drop-bag locations"
-    },
-    {
-      "title": "Jonathan Live Tracker",
-      "url": "https://live.utmb.world/canyons/2026/runners/1159",
-      "label": "Live runner page for Jonathan FOOKES, bib 1159"
     }
   ]
 }

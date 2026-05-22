@@ -5,8 +5,7 @@
   "description": "Generated Canyons 100K race-day crew guide.",
   "scripts": {
     "build": "node scripts/generate.js",
-    "review": "node scripts/review.js",
-    "refresh-live": "node scripts/fetch-live-data.js && node scripts/generate.js"
+    "review": "node scripts/review.js"
   },
   "devDependencies": {
     "playwright": "^1.52.0"

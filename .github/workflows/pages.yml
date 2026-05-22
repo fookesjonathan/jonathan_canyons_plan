@@ -6,8 +6,6 @@ on:
       - main
       - codex/maptiler-route-map
   workflow_dispatch:
-  schedule:
-    - cron: "*/15 * * * *"
 
 permissions:
   contents: read
@@ -31,9 +29,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-     # - name: Refresh live data
-     #   run: node scripts/fetch-live-data.js
 
       - name: Generate site
         run: node scripts/generate.js
